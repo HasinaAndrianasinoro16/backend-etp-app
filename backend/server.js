@@ -1,4 +1,4 @@
-// backend/server.js - VERSION CLOUD
+// backend/server.js
 import express from "express";
 import nodemailer from "nodemailer";
 import cors from "cors";
@@ -8,9 +8,9 @@ import multer from "multer";
 dotenv.config();
 const app = express();
 
-// CORS config - Autoriser toutes les origines pour l'app mobile
+// CORS config pour mobile
 app.use(cors({
-    origin: '*', // Pour mobile, on accepte toutes les origines
+    origin: '*', // Pour développement, limitez en production
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -49,8 +49,7 @@ app.get("/", (req, res) => {
     res.json({
         message: "BFM Backend is running!",
         version: "1.0.0",
-        emailService: "Active",
-        status: "healthy"
+        emailService: "Active"
     });
 });
 
@@ -69,6 +68,7 @@ app.post("/send-email", upload.single("file"), async (req, res) => {
         const { to, subject, message } = req.body;
         const file = req.file;
 
+        // Validation des données
         if (!to || !subject || !message) {
             return res.status(400).json({
                 success: false,
@@ -76,6 +76,7 @@ app.post("/send-email", upload.single("file"), async (req, res) => {
             });
         }
 
+        // Validation de l'email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(to)) {
             return res.status(400).json({
@@ -121,7 +122,9 @@ app.post("/send-email", upload.single("file"), async (req, res) => {
     }
 });
 
-// Route d'envoi CSV
+// backend/server.js
+// ... (garder les imports existants)
+
 app.post("/send-csv", upload.single("file"), async (req, res) => {
     try {
         const { to, subject, message, periode } = req.body;
@@ -177,11 +180,15 @@ app.post("/send-csv", upload.single("file"), async (req, res) => {
     }
 });
 
-// ⭐ IMPORTANT: Utiliser le port fourni par l'hébergeur cloud
-const PORT = process.env.PORT || 4000;
+// ... (garder le reste du fichier)
 
+const IP_ADDRESS = '10.200.222.124';
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Backend démarré sur le port ${PORT}`);
+    console.log(`✅ Backend démarré sur:
+    - Local: http://localhost:${PORT}
+    - Réseau: http://${IP_ADDRESS}:${PORT}
+    `);
     console.log(`📧 Service d'email configuré avec ${process.env.MAIL_USER}`);
-    console.log(`🌍 Accessible publiquement`);
+    console.log(`🌐 Accessible depuis le réseau local`);
 });
